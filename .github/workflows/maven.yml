@@ -21,6 +21,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
@@ -28,11 +29,11 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Set environment variables for MySQL
+      - name: Set environment variables for PostgreSQL
         run: |
-          echo "MYSQL_ADDON_URL=${{ secrets.MYSQL_ADDON_URL }}" >> $GITHUB_ENV
-          echo "MYSQL_ADDON_USER=${{ secrets.MYSQL_ADDON_USER }}" >> $GITHUB_ENV
-          echo "MYSQL_ADDON_PASSWORD=${{ secrets.MYSQL_ADDON_PASSWORD }}" >> $GITHUB_ENV
+          echo "POSTGRES_ADDON_URL=${{ secrets.POSTGRES_ADDON_URL }}" >> $GITHUB_ENV
+          echo "POSTGRES_ADDON_USER=${{ secrets.POSTGRES_ADDON_USER }}" >> $GITHUB_ENV
+          echo "POSTGRES_ADDON_PASSWORD=${{ secrets.POSTGRES_ADDON_PASSWORD }}" >> $GITHUB_ENV
 
       - name: Build with Maven
         run: mvn clean install
@@ -49,7 +50,7 @@ jobs:
 
   deploy:
     name: Deploy
-    needs: [build]
+    needs: [build] # The deploy step will only run if the build step passes
     runs-on: ubuntu-latest
 
     steps:
