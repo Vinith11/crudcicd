@@ -20,35 +20,41 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up JDK 17
-      uses: actions/setup-java@v4
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-        cache: maven
-    - name: Build with Maven
-      run: mvn clean install
+      - uses: actions/checkout@v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
 
-    - name: Build & push Docker image
-      uses: mr-smithers-excellent/docker-build-push@v6
-      with:
-        image: vinith11/spring-cicdaction-crud
-        tags: latest
-        registry: docker.io
-        dockerfile: Dockerfile
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Set environment variables for MySQL
+        run: |
+          echo "MYSQL_ADDON_URL=${{ secrets.MYSQL_ADDON_URL }}" >> $GITHUB_ENV
+          echo "MYSQL_ADDON_USER=${{ secrets.MYSQL_ADDON_USER }}" >> $GITHUB_ENV
+          echo "MYSQL_ADDON_PASSWORD=${{ secrets.MYSQL_ADDON_PASSWORD }}" >> $GITHUB_ENV
 
-  # Heavily modified deploy job to fit render.com
+      - name: Build with Maven
+        run: mvn clean install
+
+      - name: Build & push Docker image
+        uses: mr-smithers-excellent/docker-build-push@v6
+        with:
+          image: vinith11/spring-cicdaction-crud
+          tags: latest
+          registry: docker.io
+          dockerfile: Dockerfile
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
   deploy:
     name: Deploy
-    needs: [build] #Our tests must pass in order to run the deploy job
+    needs: [build]
     runs-on: ubuntu-latest
 
     steps:
       - name: Deploy to production
         uses: johnbeynon/render-deploy-action@v0.0.8
         with:
-          service-id: ${{ secrets.SERVICE_ID }} # Can be found as part of the Deploy Hook
-          api-key: ${{ secrets.RENDER_API_KEY }} # Create your API key in Render Dashboard > Account Settings
+          service-id: ${{ secrets.SERVICE_ID }}
+          api-key: ${{ secrets.RENDER_API_KEY }}
