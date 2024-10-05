@@ -28,6 +28,12 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
+      - name: Set environment variables for PostgreSQL
+        run: |
+          echo "POSTGRES_ADDON_URL=${{ secrets.POSTGRES_ADDON_URL }}" >> $GITHUB_ENV
+          echo "POSTGRES_ADDON_USER=${{ secrets.POSTGRES_ADDON_USER }}" >> $GITHUB_ENV
+          echo "POSTGRES_ADDON_PASSWORD=${{ secrets.POSTGRES_ADDON_PASSWORD }}" >> $GITHUB_ENV
+
       - name: Run Tests with Maven
         run: mvn clean test
 
