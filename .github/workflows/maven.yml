@@ -15,8 +15,24 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
+  test:
+    runs-on: ubuntu-latest
 
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Run Tests with Maven
+        run: mvn clean test
+
+  build:
+    needs: test
     runs-on: ubuntu-latest
 
     steps:
@@ -49,8 +65,7 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
   deploy:
-    name: Deploy
-    needs: [build] # The deploy step will only run if the build step passes
+    needs: build # The deploy step will only run if the build step passes
     runs-on: ubuntu-latest
 
     steps:
